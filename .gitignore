@@ -1,0 +1,52 @@
+# Build folders
+/target/
+/build/
+/out/
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+
+# Spring Boot
+*.pid
+*.pid.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# IntelliJ
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+
+# Node modules (if frontend added later)
+node_modules/
+
+# Environment variables
+.env
+
+# H2 database
+*.mv.db
+*.trace.db
+
+# Temporary files
+*.tmp
+*.swp
+*~
