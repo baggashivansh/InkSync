@@ -1,161 +1,219 @@
 # InkSync
 
-InkSync is a realtime collaborative notes platform built with Spring Boot and WebSockets.
+A realtime collaborative document editor built with Spring Boot and WebSockets.
 
-The project explores how modern collaborative systems work under the hood. Instead of notes being stored only on a single device, InkSync keeps documents synchronized in the backend so multiple users can edit the same content and instantly see updates.
+InkSync allows multiple users to edit the same document at the same time while seeing changes instantly. Instead of storing notes locally on a device, InkSync synchronizes content through a backend service so edits appear across all connected users in real time.
 
-The goal of this project is to design and implement the backend architecture behind realtime editing systems while keeping the system simple, scalable, and understandable.
+This project focuses on building a backend system that handles realtime communication, document synchronization, and collaborative editing.
 
----
+Example
 
-## What InkSync Does
+User A typing in the editor
 
-InkSync allows users to open a document in the browser and start typing. As edits happen, those updates are immediately sent to the backend and broadcast to other connected users.
+Hello from laptop
 
-If two people open the same document link, they will see each other's changes appear in real time.
+User B viewing the same document instantly sees
 
-This creates a collaborative editing experience where the document stays synchronized across devices and users without requiring page refreshes.
-
----
-
-## Core Features
-
-Realtime Collaborative Editing
-Multiple users can edit the same document simultaneously and see updates appear instantly.
-
-Document Based Sync Rooms
-Each document uses its own WebSocket channel. This ensures that updates are only sent to users who are currently editing that specific document.
-
-Efficient Update Broadcasting
-Typing events are debounced before being sent to the server which reduces unnecessary network traffic and improves performance.
-
-Shareable Document Links
-Every document has a unique URL that can be shared with others to allow collaborative editing.
-
-Cloud Stored Notes
-All notes are stored in the backend so they remain accessible and consistent across devices.
+Hello from laptop
 
 ---
 
-## How It Works
+Live Demo
 
-InkSync uses a combination of REST APIs and WebSockets.
+Backend deployed on Render
 
-The REST layer is responsible for loading and storing documents, while the WebSocket layer handles realtime communication between clients.
+Live URL will be added after deployment.
 
-A simplified flow looks like this:
+Source Code
 
-User edits document
-↓
-Browser sends update to backend
-↓
-Spring Boot processes the change
-↓
-WebSocket broadcasts update
-↓
-All connected clients receive the update
+https://github.com/baggashivansh/InkSync
 
-This architecture allows multiple users to stay synchronized with minimal delay.
+Open the same document link in multiple browser tabs to see realtime synchronization in action.
 
 ---
 
-## Architecture Overview
+Why This Project Exists
 
-InkSync follows a layered backend structure.
+Most note taking tools save content locally and synchronize slowly between devices. When multiple users attempt to edit the same document, conflicts can occur or changes may appear delayed.
 
-Client (Browser)
+InkSync approaches the problem differently by treating documents as shared collaborative spaces. Every edit is sent to the backend and broadcast instantly to other connected users.
+
+The goal of this project was to understand how realtime collaborative systems work and to implement a simplified backend architecture similar to modern collaborative editors.
+
+---
+
+How InkSync Works
+
+The system follows a realtime communication model using WebSockets.
+
+1 A user opens a document in the browser
+2 The client connects to the server through a WebSocket connection
+3 When the user edits the document, the update is sent to the backend
+4 The backend broadcasts the update to other connected users editing the same document
+
+Because each document has its own communication channel, only users working on the same document receive those updates.
+
+This approach allows edits to appear almost instantly across multiple clients.
+
+---
+
+System Architecture
+
+InkSync follows a layered backend architecture.
+
+Client Browser
 ↓
-REST API
+Spring Boot REST Controller
 ↓
-Spring Boot Application
+WebSocket Messaging Layer
+↓
+Service Layer
+↓
+Repository Layer
 ↓
 Database
 
-For realtime communication:
+Each component has a specific responsibility.
 
-Client
-↓
-WebSocket Connection
-↓
-Spring Message Broker
-↓
-Broadcast to document channel
+Controller layer
+Handles HTTP requests and WebSocket message mappings.
 
-Each document has its own communication channel.
+Service layer
+Contains the core logic responsible for handling document updates.
 
-Example:
+Repository layer
+Manages persistence and retrieval of document data.
+
+WebSocket messaging layer
+Broadcasts edits to connected clients in realtime.
+
+---
+
+Realtime Synchronization
+
+InkSync uses document scoped communication channels.
+
+Example
 
 /topic/notes/{docId}
 
-This prevents unnecessary global broadcasts and allows the system to scale as more documents and users are added.
+When a user edits a document, the update is sent to
+
+/app/edit/{docId}
+
+The server then broadcasts the update to
+
+/topic/notes/{docId}
+
+Only clients subscribed to that document receive the change.
+
+This prevents unnecessary global broadcasts and keeps the system efficient.
 
 ---
 
-## Project Structure
+Features
 
-src/main/java/com/shivansh/inksync
+Realtime collaborative editing
+Multiple users can edit the same document simultaneously.
 
-controller
-Handles HTTP requests and WebSocket message mappings
+Document specific WebSocket channels
+Each document has its own realtime communication room.
 
-service
-Contains the core application logic
+Debounced updates
+Typing events are grouped before sending updates to reduce network traffic.
 
-repository
-Handles database access through Spring Data JPA
+Shareable document links
+Users can share document URLs for collaborative editing.
 
-model
-Entity classes representing database tables
-
-config
-Application configuration including WebSocket setup
-
-resources/static
-Frontend files used for the editor interface
+Simple browser based editor
+Frontend served directly from the backend.
 
 ---
 
-## Running the Project Locally
+Running Locally
 
 Clone the repository
 
 git clone https://github.com/baggashivansh/InkSync.git
-
-Navigate to the project folder
-
 cd InkSync
 
-Run the application
+Run the Spring Boot application
 
 ./mvnw spring-boot:run
 
-Once the server starts, open the application in the browser and create or access a document.
+Once the server starts, open
 
-Opening the same document in multiple browser tabs will demonstrate realtime synchronization.
+http://localhost:8080/editor/1
 
----
-
-## What This Project Demonstrates
-
-InkSync focuses on several important backend engineering concepts.
-
-Designing realtime systems using WebSockets
-Handling concurrent edits from multiple clients
-Structuring a layered Spring Boot application
-Building scalable event driven communication
-Designing backend systems for collaborative applications
+Open the same URL in multiple browser tabs to test realtime synchronization.
 
 ---
 
-## Author
+Deployment
 
-Shivansh Bagga
-Computer Science Student | Backend Developer
+InkSync can be deployed using Docker and cloud platforms such as Render.
 
-InkSync was built as part of a learning journey focused on backend architecture and distributed systems.
+Deployment workflow
+
+1 The GitHub repository is connected to Render
+2 Render builds the Docker image
+3 Maven compiles the Spring Boot project
+4 A JAR file is generated
+5 The container starts the application
+6 Render assigns a public URL
+
+Render provides the port dynamically, so the application binds to the environment port instead of a fixed port.
 
 ---
 
-## License
+Tech Stack
 
-MIT License
+Backend
+
+Java
+Spring Boot
+Spring Web
+Spring Data JPA
+
+Realtime Communication
+
+WebSockets
+STOMP Messaging
+
+Build Tool
+
+Maven
+
+Deployment
+
+Docker
+Render
+
+---
+
+Project Structure
+
+InkSync
+
+src
+└─ main
+├─ java
+│   └─ com/shivansh/inksync
+│       ├─ controller
+│       ├─ service
+│       ├─ repository
+│       └─ model
+│
+└─ resources
+└─ static
+└─ index.html
+
+Dockerfile
+pom.xml
+README.md
+
+---
+
+Author
+
+Built by Shivansh Bagga
