@@ -1,427 +1,161 @@
-InkSync
+# InkSync
 
-A Collaborative Notes and Knowledge Sync Platform
+InkSync is a realtime collaborative notes platform built with Spring Boot and WebSockets.
 
----
+The project explores how modern collaborative systems work under the hood. Instead of notes being stored only on a single device, InkSync keeps documents synchronized in the backend so multiple users can edit the same content and instantly see updates.
 
-Overview
-
-InkSync is a backend driven collaborative notes platform where users can create, edit, and synchronize notes across multiple devices in real time.
-
-The goal of InkSync is to design a backend system capable of storing, syncing, and managing knowledge while handling multiple users editing and accessing the same content.
-
-Instead of notes being stored locally on one device, InkSync keeps everything in the cloud and synchronizes updates across devices instantly.
-
-Example scenario:
-
-A user writes notes on their laptop.
-
-Within seconds the same note appears on their phone or tablet.
-
-This system introduces real world backend challenges such as:
-
-- data synchronization
-- concurrent updates
-- version control
-- real time communication
-- conflict resolution
-
-InkSync is designed as a backend heavy system similar to simplified versions of Notion, Google Docs, or Evernote.
+The goal of this project is to design and implement the backend architecture behind realtime editing systems while keeping the system simple, scalable, and understandable.
 
 ---
 
-Problem Statement
+## What InkSync Does
 
-Many note taking applications store data locally or sync slowly between devices.
+InkSync allows users to open a document in the browser and start typing. As edits happen, those updates are immediately sent to the backend and broadcast to other connected users.
 
-Problems users face:
+If two people open the same document link, they will see each other's changes appear in real time.
 
-• Notes not updated across devices
-• Conflicts when editing the same note
-• Losing data after crashes
-• Difficulty sharing notes with others
-
-InkSync solves these issues by creating a centralized synchronization service.
+This creates a collaborative editing experience where the document stays synchronized across devices and users without requiring page refreshes.
 
 ---
 
-Core Features
+## Core Features
 
-Create and Manage Notes
+Realtime Collaborative Editing
+Multiple users can edit the same document simultaneously and see updates appear instantly.
 
-Users can create notes containing:
+Document Based Sync Rooms
+Each document uses its own WebSocket channel. This ensures that updates are only sent to users who are currently editing that specific document.
 
-- plain text
-- markdown
-- code snippets
-- lists
+Efficient Update Broadcasting
+Typing events are debounced before being sent to the server which reduces unnecessary network traffic and improves performance.
 
-Example note
+Shareable Document Links
+Every document has a unique URL that can be shared with others to allow collaborative editing.
 
-Title: Backend System Design
-
-Topics:
-- Load Balancer
-- Redis Caching
-- Database Sharding
-
-Each note is stored securely in the backend database.
+Cloud Stored Notes
+All notes are stored in the backend so they remain accessible and consistent across devices.
 
 ---
 
-Real Time Synchronization
+## How It Works
 
-Whenever a note is edited, the update is synchronized across all devices connected to the user's account.
+InkSync uses a combination of REST APIs and WebSockets.
 
-Example flow:
+The REST layer is responsible for loading and storing documents, while the WebSocket layer handles realtime communication between clients.
 
-User edits note
+A simplified flow looks like this:
+
+User edits document
 ↓
-Client sends update to server
+Browser sends update to backend
 ↓
-Server stores change
+Spring Boot processes the change
 ↓
-Server broadcasts update to other devices
+WebSocket broadcasts update
+↓
+All connected clients receive the update
 
-This allows seamless editing between multiple devices.
-
----
-
-Multi Device Support
-
-A user can access notes from:
-
-• phone
-• laptop
-• tablet
-
-All notes remain consistent and synchronized.
+This architecture allows multiple users to stay synchronized with minimal delay.
 
 ---
 
-Note Sharing
+## Architecture Overview
 
-Users can share notes with others.
+InkSync follows a layered backend structure.
 
-Example:
-
-Owner: Shivansh
-Shared with: Team Members
-Permission: Read / Edit
-
-This feature allows collaborative note writing.
-
----
-
-Version History
-
-Every update to a note creates a new version.
-
-Example:
-
-Version 1
-Created note
-
-Version 2
-Added system design section
-
-Version 3
-Added Redis explanation
-
-Users can restore older versions if needed.
-
----
-
-Offline Editing and Sync
-
-Users can edit notes even without internet access.
-
-Once the device reconnects, changes are synchronized with the server.
-
----
-
-System Architecture
-
-InkSync follows a distributed backend architecture.
-
-Client Applications
-(Web / Mobile)
-       |
-       v
-API Gateway
-       |
-       v
-Application Services
-       |
-       v
+Client (Browser)
+↓
+REST API
+↓
+Spring Boot Application
+↓
 Database
 
-For real time updates, a WebSocket layer can be used.
+For realtime communication:
 
 Client
-   |
+↓
 WebSocket Connection
-   |
-Realtime Sync Server
+↓
+Spring Message Broker
+↓
+Broadcast to document channel
+
+Each document has its own communication channel.
+
+Example:
+
+/topic/notes/{docId}
+
+This prevents unnecessary global broadcasts and allows the system to scale as more documents and users are added.
 
 ---
 
-Technology Stack
+## Project Structure
 
-Backend
+src/main/java/com/shivansh/inksync
 
-Java
-Spring Boot
-Spring Web
-Spring Data JPA
+controller
+Handles HTTP requests and WebSocket message mappings
 
-Database
+service
+Contains the core application logic
 
-MySQL
+repository
+Handles database access through Spring Data JPA
 
-Optional Technologies
+model
+Entity classes representing database tables
 
-Redis (caching)
-WebSockets (real time updates)
-Docker (containerization)
-Kafka (event streaming)
+config
+Application configuration including WebSocket setup
 
----
-
-Database Design
-
-Users Table
-
-Field| Type| Description
-id| BIGINT| Primary key
-name| VARCHAR| User name
-email| VARCHAR| Unique email
-password_hash| VARCHAR| Secure password
+resources/static
+Frontend files used for the editor interface
 
 ---
 
-Notes Table
+## Running the Project Locally
 
-Field| Type| Description
-id| BIGINT| Primary key
-title| VARCHAR| Note title
-content| TEXT| Note content
-owner_id| BIGINT| User reference
-created_at| TIMESTAMP| Creation time
-updated_at| TIMESTAMP| Last update
+Clone the repository
 
----
+git clone https://github.com/baggashivansh/InkSync.git
 
-Note Versions Table
+Navigate to the project folder
 
-Field| Type| Description
-id| BIGINT| Primary key
-note_id| BIGINT| Reference to note
-content| TEXT| Snapshot of content
-version_number| INT| Version index
-created_at| TIMESTAMP| Version timestamp
+cd InkSync
+
+Run the application
+
+./mvnw spring-boot:run
+
+Once the server starts, open the application in the browser and create or access a document.
+
+Opening the same document in multiple browser tabs will demonstrate realtime synchronization.
 
 ---
 
-Shared Notes Table
+## What This Project Demonstrates
 
-Field| Type| Description
-id| BIGINT| Primary key
-note_id| BIGINT| Reference to note
-user_id| BIGINT| Shared user
-permission| VARCHAR| Read or Edit
+InkSync focuses on several important backend engineering concepts.
 
----
-
-API Endpoints
-
-Create Note
-
-POST /api/notes
-
-Request
-
-{
-  "title": "System Design",
-  "content": "Notes about distributed systems"
-}
-
-Response
-
-{
-  "noteId": 101,
-  "message": "Note created successfully"
-}
+Designing realtime systems using WebSockets
+Handling concurrent edits from multiple clients
+Structuring a layered Spring Boot application
+Building scalable event driven communication
+Designing backend systems for collaborative applications
 
 ---
 
-Get Notes
+## Author
 
-GET /api/notes
+Shivansh Bagga
+Computer Science Student | Backend Developer
 
-Returns all notes belonging to the user.
-
----
-
-Update Note
-
-PUT /api/notes/{id}
-
-Request
-
-{
-  "content": "Updated content"
-}
-
-Each update also creates a new version entry.
+InkSync was built as part of a learning journey focused on backend architecture and distributed systems.
 
 ---
 
-Share Note
-
-POST /api/notes/{id}/share
-
-Request
-
-{
-  "userEmail": "teammate@email.com",
-  "permission": "EDIT"
-}
-
----
-
-Get Version History
-
-GET /api/notes/{id}/versions
-
-Returns all saved versions of the note.
-
----
-
-Example Project Structure
-
-inksync
- ├── controller
- │     └── NoteController.java
- │
- ├── service
- │     └── NoteService.java
- │
- ├── repository
- │     └── NoteRepository.java
- │
- ├── model
- │     ├── Note.java
- │     ├── User.java
- │     └── NoteVersion.java
- │
- ├── sync
- │     └── SyncService.java
- │
- └── websocket
-       └── NoteSyncHandler.java
-
-This layered structure ensures maintainable and scalable backend code.
-
----
-
-Synchronization Strategy
-
-InkSync must handle multiple devices updating the same note.
-
-Possible approaches:
-
-Last Write Wins
-
-The most recent update overwrites older ones.
-
-Simple but may cause data loss.
-
----
-
-Version Based Updates
-
-Each note has a version number.
-
-Client sends update with version
-Server checks version
-If mismatch → conflict detected
-
----
-
-Operational Transform (Advanced)
-
-Used by systems like Google Docs.
-
-Allows merging concurrent edits in real time.
-
----
-
-Performance Considerations
-
-Database Indexing
-
-Indexes should exist on:
-
-user_id
-note_id
-created_at
-
-This improves query speed.
-
----
-
-Caching
-
-Frequently accessed notes can be cached in Redis.
-
-This reduces database load.
-
----
-
-Event Driven Sync
-
-Using Kafka or message queues allows scalable synchronization across services.
-
----
-
-Future Enhancements
-
-InkSync can grow into a much larger platform.
-
-Possible features:
-
-• Markdown rendering
-• AI powered note summarization
-• Full text search
-• Tag based organization
-• Graph based knowledge linking
-• End to end encryption
-• Multi workspace collaboration
-
----
-
-Learning Outcomes
-
-Building InkSync teaches important backend concepts such as:
-
-- collaborative systems
-- synchronization logic
-- database modeling
-- version control
-- distributed architecture
-- event driven systems
-
-It is a strong intermediate to advanced backend project.
-
----
-
-License
+## License
 
 MIT License
-
----
-
-Author
-
-Built by Shivansh Bagga
